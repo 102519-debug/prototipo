@@ -1,0 +1,375 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Patch-ID 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: encabezado sobrio arriba, escenario 3D amplio al centro, controles y leyenda de capas debajo. */
+  :root {
+    --bg: #ECEDEF;
+    --fg: #1D1F23;
+    --muted: #666A72;
+    --red: #B01E2B;
+    --gray: #9A9DA2;
+    --line: rgba(29, 31, 35, 0.14);
+    --panel: #F7F7F8;
+    --font-display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141518;
+      --fg: #ECEDEF;
+      --muted: #9A9EA6;
+      --red: #D93A4B;
+      --gray: #9A9DA2;
+      --line: rgba(236, 237, 239, 0.16);
+      --panel: #1C1D21;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141518;
+    --fg: #ECEDEF;
+    --muted: #9A9EA6;
+    --red: #D93A4B;
+    --gray: #9A9DA2;
+    --line: rgba(236, 237, 239, 0.16);
+    --panel: #1C1D21;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-size: 15px;
+    line-height: 1.5;
+    padding-block: 28px 40px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    margin: 6px 0 0;
+    font-size: clamp(44px, 9vw, 92px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+  h1 .dot { color: var(--red); }
+  .lede { margin: 12px 0 0; max-width: 52ch; color: var(--muted); font-size: 16px; }
+
+  .stage {
+    position: relative;
+    height: clamp(380px, 64vh, 640px);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; outline: none; }
+  canvas:active { cursor: grabbing; }
+  canvas:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+  .hint {
+    position: absolute; left: 0; bottom: 10px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em;
+    color: var(--muted); pointer-events: none;
+  }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--panel); }
+  .seg button, .ghost {
+    font: inherit; font-weight: 500; font-size: 14px; color: var(--fg);
+    background: transparent; border: 0; border-radius: 999px; padding: 8px 18px; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--red); color: #fff; }
+  .ghost { border: 1px solid var(--line); }
+  .seg button:focus-visible, .ghost:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+  .layers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; padding: 0; margin: 0; list-style: none; }
+  .layers li { display: flex; gap: 12px; min-width: 0; }
+  .sw { flex: none; width: 14px; height: 14px; border-radius: 4px; margin-top: 5px; }
+  .layers b { display: block; font-weight: 700; }
+  .layers span { color: var(--muted); }
+  .note { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.04em; max-width: 70ch; }
+</style>
+
+<main class="wrap">
+  <header>
+    <div class="eyebrow">Colegio Inglés Durkheim · Durkheim Intelligence</div>
+    <h1>Patch-ID<span class="dot">.</span></h1>
+    <p class="lede">Parche escaneable con QR y GPS para chamarras, mochilas y útiles. Gris y rojo, como el uniforme.</p>
+  </header>
+
+  <section class="stage" aria-label="Modelo 3D del parche">
+    <canvas id="cv" tabindex="0" aria-label="Modelo 3D del parche Patch-ID. Arrastra para girarlo, usa las flechas del teclado."></canvas>
+    <div class="hint">ARRASTRA PARA GIRAR</div>
+  </section>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Vista">
+      <button id="b-asm" type="button" aria-pressed="true">Armado</button>
+      <button id="b-lay" type="button" aria-pressed="false">Por capas</button>
+    </div>
+    <button id="b-rst" class="ghost" type="button">Vista inicial</button>
+  </div>
+
+  <ul class="layers">
+    <li><i class="sw" style="background:var(--red)"></i><div><b>Capa superior</b><span>Fieltro gris con borde rojo cosido y el código QR para escanear.</span></div></li>
+    <li><i class="sw" style="background:#2f3237"></i><div><b>Capa media</b><span>Chip con GPS y antena delgada.</span></div></li>
+    <li><i class="sw" style="background:#D7D8DB;border:1px solid var(--line)"></i><div><b>Base</b><span>Adhesivo termofusible para fijar el parche a la prenda.</span></div></li>
+  </ul>
+
+  <p class="note">Modelo ilustrativo. Tamaño propuesto: 4 × 4 cm. El QR del modelo es decorativo y no contiene datos.</p>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  var cv = document.getElementById('cv');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8d94, 0.95));
+  var key = new THREE.DirectionalLight(0xffffff, 0.9);
+  key.position.set(-4, 6, 8);
+  scene.add(key);
+  var rim = new THREE.DirectionalLight(0xffffff, 0.35);
+  rim.position.set(6, -2, -4);
+  scene.add(rim);
+
+  var RED = 0xB01E2B, FELT = 0x9A9DA2, CHAR = 0x2f3237, LIGHT = 0xD7D8DB;
+
+  function rr(w, h, r) {
+    var x = -w / 2, y = -h / 2, s = new THREE.Shape();
+    s.moveTo(x + r, y);
+    s.lineTo(x + w - r, y);
+    s.absarc(x + w - r, y + r, r, -Math.PI / 2, 0, false);
+    s.lineTo(x + w, y + h - r);
+    s.absarc(x + w - r, y + h - r, r, 0, Math.PI / 2, false);
+    s.lineTo(x + r, y + h);
+    s.absarc(x + r, y + h - r, r, Math.PI / 2, Math.PI, false);
+    s.lineTo(x, y + r);
+    s.absarc(x + r, y + r, r, Math.PI, Math.PI * 1.5, false);
+    return s;
+  }
+  function ring(ow, or_, iw, ir) {
+    var s = rr(ow, ow, or_);
+    s.holes.push(rr(iw, iw, ir));
+    return s;
+  }
+  function extrude(shape, depth, bevel) {
+    return new THREE.ExtrudeGeometry(shape, {
+      depth: depth, curveSegments: 48,
+      bevelEnabled: !!bevel, bevelThickness: bevel || 0, bevelSize: bevel || 0, bevelSegments: 3
+    });
+  }
+
+  // Textura de fieltro: ruido fino como relieve
+  function noiseTex() {
+    var c = document.createElement('canvas'); c.width = c.height = 256;
+    var g = c.getContext('2d'), d = g.createImageData(256, 256), i, v;
+    for (i = 0; i < d.data.length; i += 4) {
+      v = 110 + Math.random() * 110;
+      d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255;
+    }
+    g.putImageData(d, 0, 0);
+    var t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(0.8, 0.8);
+    return t;
+  }
+
+  // QR decorativo (no codifica datos): ojos en rojo, módulos en carbón
+  function qrTex() {
+    var N = 25, S = 20, pad = 2, size = (N + pad * 2) * S;
+    var c = document.createElement('canvas'); c.width = c.height = size;
+    var g = c.getContext('2d');
+    g.fillStyle = '#F4F4F5'; g.fillRect(0, 0, size, size);
+    var seed = 20261106;
+    function rnd() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
+    function isEye(x, y) {
+      return (x < 8 && y < 8) || (x > N - 9 && y < 8) || (x < 8 && y > N - 9);
+    }
+    g.fillStyle = '#1D1F23';
+    for (var y = 0; y < N; y++) for (var x = 0; x < N; x++) {
+      if (isEye(x, y)) continue;
+      var on = (x === 6 || y === 6) ? ((x + y) % 2 === 0) : rnd() > 0.52;
+      if (on) g.fillRect((x + pad) * S, (y + pad) * S, S - 1, S - 1);
+    }
+    function eye(ox, oy) {
+      var px = (ox + pad) * S, py = (oy + pad) * S;
+      g.fillStyle = '#B01E2B'; g.fillRect(px, py, 7 * S, 7 * S);
+      g.fillStyle = '#F4F4F5'; g.fillRect(px + S, py + S, 5 * S, 5 * S);
+      g.fillStyle = '#B01E2B'; g.fillRect(px + 2 * S, py + 2 * S, 3 * S, 3 * S);
+    }
+    eye(0, 0); eye(N - 7, 0); eye(0, N - 7);
+    var t = new THREE.CanvasTexture(c);
+    t.anisotropy = 8;
+    return t;
+  }
+
+  var pivot = new THREE.Group();
+  scene.add(pivot);
+  var stack = new THREE.Group();
+  stack.position.z = -0.1;
+  pivot.add(stack);
+
+  // Base adhesiva
+  var base = new THREE.Group();
+  base.add(new THREE.Mesh(extrude(rr(3.6, 3.6, 0.5), 0.05, 0.01),
+    new THREE.MeshStandardMaterial({ color: LIGHT, roughness: 0.7 })));
+  stack.add(base);
+
+  // Capa media: placa, antena, chip, pistas
+  var mid = new THREE.Group();
+  mid.add(new THREE.Mesh(extrude(rr(3.2, 3.2, 0.35), 0.06, 0.008),
+    new THREE.MeshStandardMaterial({ color: CHAR, roughness: 0.55, metalness: 0.15 })));
+  var ant = new THREE.Mesh(extrude(ring(2.7, 0.28, 2.6, 0.23), 0.02),
+    new THREE.MeshStandardMaterial({ color: 0xC9CBD0, roughness: 0.3, metalness: 0.7 }));
+  ant.position.z = 0.07; mid.add(ant);
+  var metal = new THREE.MeshStandardMaterial({ color: 0xC9CBD0, roughness: 0.3, metalness: 0.7 });
+  var chip = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.12),
+    new THREE.MeshStandardMaterial({ color: 0x15161a, roughness: 0.35, metalness: 0.2 }));
+  chip.position.z = 0.13; mid.add(chip);
+  var led = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.02),
+    new THREE.MeshStandardMaterial({ color: RED, emissive: RED, emissiveIntensity: 0.5 }));
+  led.position.set(-0.27, 0.27, 0.2); mid.add(led);
+  [[0.85, 0, 0.9, 0.04], [-0.85, 0, 0.9, 0.04], [0, 0.85, 0.04, 0.9], [0, -0.85, 0.04, 0.9]].forEach(function (t) {
+    var m = new THREE.Mesh(new THREE.BoxGeometry(t[2], t[3], 0.015), metal);
+    m.position.set(t[0], t[1], 0.075); mid.add(m);
+  });
+  stack.add(mid);
+
+  // Capa superior: fieltro, borde rojo, puntadas, tarjeta QR
+  var top = new THREE.Group();
+  var nt = noiseTex();
+  var felt = new THREE.Mesh(extrude(rr(3.94, 3.94, 0.52), 0.1, 0.03),
+    new THREE.MeshStandardMaterial({ color: FELT, roughness: 0.95, bumpMap: nt, bumpScale: 0.9 }));
+  top.add(felt);
+  var border = new THREE.Mesh(extrude(ring(4.0, 0.55, 3.5, 0.3), 0.05, 0.015),
+    new THREE.MeshStandardMaterial({ color: RED, roughness: 0.85, bumpMap: nt, bumpScale: 0.6 }));
+  border.position.z = 0.1; top.add(border);
+
+  var pts = rr(3.75, 3.75, 0.425).getSpacedPoints(160), n = pts.length - 1;
+  var count = Math.floor(n / 2);
+  var st = new THREE.InstancedMesh(new THREE.BoxGeometry(0.13, 0.035, 0.02),
+    new THREE.MeshStandardMaterial({ color: 0xF1F1F2, roughness: 0.8 }), count);
+  var o = new THREE.Object3D(), k, a, b;
+  for (k = 0; k < count; k++) {
+    a = pts[k * 2]; b = pts[(k * 2 + 1) % n];
+    o.position.set(a.x, a.y, 0.172);
+    o.rotation.set(0, 0, Math.atan2(b.y - a.y, b.x - a.x));
+    o.updateMatrix(); st.setMatrixAt(k, o.matrix);
+  }
+  top.add(st);
+
+  var tile = new THREE.Mesh(extrude(rr(2.2, 2.2, 0.2), 0.04, 0.008),
+    new THREE.MeshStandardMaterial({ color: 0xF4F4F5, roughness: 0.6 }));
+  tile.position.z = 0.1; top.add(tile);
+  var qr = new THREE.Mesh(new THREE.PlaneGeometry(1.86, 1.86),
+    new THREE.MeshBasicMaterial({ map: qrTex() }));
+  qr.position.z = 0.152; top.add(qr);
+  stack.add(top);
+
+  // Sombra fija en el piso
+  var sc = document.createElement('canvas'); sc.width = sc.height = 128;
+  var sg = sc.getContext('2d'), gr = sg.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, 'rgba(0,0,0,0.38)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  sg.fillStyle = gr; sg.fillRect(0, 0, 128, 128);
+  var shadow = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 6.4),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false }));
+  shadow.rotation.x = -Math.PI / 2; shadow.position.y = -2.85;
+  scene.add(shadow);
+
+  // Estados
+  var HOME = { x: 0.28, y: -0.62 };
+  var tx = HOME.x, ty = HOME.y, touched = false;
+  var exploded = 0, explodeTarget = 0;
+  var Z = { base: [0, -1.5], mid: [0.07, 0], top: [0.14, 1.5] };
+
+  function setView(layers) {
+    explodeTarget = layers ? 1 : 0;
+    document.getElementById('b-asm').setAttribute('aria-pressed', String(!layers));
+    document.getElementById('b-lay').setAttribute('aria-pressed', String(layers));
+    if (reduce) exploded = explodeTarget;
+  }
+  document.getElementById('b-asm').addEventListener('click', function () { setView(false); });
+  document.getElementById('b-lay').addEventListener('click', function () { setView(true); });
+  document.getElementById('b-rst').addEventListener('click', function () { tx = HOME.x; ty = HOME.y; touched = false; });
+
+  var drag = false, lx = 0, ly = 0;
+  function clampX(v) { return Math.max(-1.2, Math.min(1.2, v)); }
+  cv.addEventListener('pointerdown', function (e) {
+    drag = true; touched = true; lx = e.clientX; ly = e.clientY;
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  cv.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    ty += (e.clientX - lx) * 0.01;
+    tx = clampX(tx + (e.clientY - ly) * 0.01);
+    lx = e.clientX; ly = e.clientY;
+  });
+  function end() { drag = false; }
+  cv.addEventListener('pointerup', end);
+  cv.addEventListener('pointercancel', end);
+  cv.addEventListener('keydown', function (e) {
+    var s = 0.12, used = true;
+    if (e.key === 'ArrowLeft') ty -= s;
+    else if (e.key === 'ArrowRight') ty += s;
+    else if (e.key === 'ArrowUp') tx = clampX(tx - s);
+    else if (e.key === 'ArrowDown') tx = clampX(tx + s);
+    else used = false;
+    if (used) { touched = true; e.preventDefault(); }
+  });
+
+  function resize() {
+    var w = cv.clientWidth, h = cv.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.position.set(0, 0, 9.5 * Math.max(1, 1.1 / camera.aspect));
+    camera.updateProjectionMatrix();
+  }
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(cv);
+  window.addEventListener('resize', resize);
+  resize();
+
+  var t0 = performance.now();
+  function frame(now) {
+    var t = (now - t0) / 1000;
+    exploded += (explodeTarget - exploded) * (reduce ? 1 : 0.08);
+    function lerp(p) { return p[0] + (p[1] - p[0]) * exploded; }
+    base.position.z = lerp(Z.base);
+    mid.position.z = lerp(Z.mid);
+    top.position.z = lerp(Z.top);
+
+    var gy = ty + (!touched && !reduce ? Math.sin(t * 0.7) * 0.28 : 0);
+    pivot.rotation.y += (gy - pivot.rotation.y) * 0.1;
+    pivot.rotation.x += (tx - pivot.rotation.x) * 0.1;
+    pivot.position.y = reduce ? 0 : Math.sin(t * 1.1) * 0.06;
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
